@@ -1,7 +1,11 @@
 import { plainToInstance } from 'class-transformer'
-import { validateSync, IsDefined, IsString } from 'class-validator'
+import { validateSync, IsDefined, IsString, IsNumber } from 'class-validator'
 
 export class EnvironmentDto {
+  @IsDefined()
+  @IsNumber()
+  API_GATEWAY_PORT: number
+
   @IsDefined()
   @IsString()
   RABBITMQ_USER!: string

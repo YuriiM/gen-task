@@ -17,6 +17,10 @@ export class AppConfigService extends ConfigService<EnvironmentDto> {
     return AppConfigService.instance
   }
 
+  get port() {
+    return <number>this.get('API_GATEWAY_PORT')
+  }
+
   get rabbitMq() {
     return {
       username: <string>this.get('RABBITMQ_USER'),
