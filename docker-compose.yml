@@ -1,0 +1,108 @@
+version: '3.5'
+
+services:
+  gen_gateway_service:
+    command: npm run start:dev
+    hostname: ${API_GATEWAY_HOST}
+    image: ${API_GATEWAY_HOST}_service
+    container_name: gen_${API_GATEWAY_HOST}_service
+    build:
+      dockerfile: Dockerfile
+      context: ./gateway.service
+      target: app
+    restart: unless-stopped
+    env_file:
+      - './.env'
+    networks:
+      - gen
+    volumes:
+      - ./gateway.service/src:/opt/node_app/src
+      - ./gateway.service/logs:/opt/node_app/logs
+      - /opt/node_app/node_modules
+    ports:
+      - ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
+    depends_on:
+      - gen_postgres
+      - gen_rabbitmq
+
+  gen_user_service:
+    entrypoint: "npm run start:dev"
+    command: npm run start:dev
+    hostname: ${USER_SERVICE_HOST}
+    image: ${USER_SERVICE_HOST}_service
+    container_name: gen_${USER_SERVICE_HOST}_service
+    build:
+      dockerfile: Dockerfile
+      context: ./user.service
+      target: app
+    restart: unless-stopped
+    env_file:
+      - './.env'
+    networks:
+      - gen
+    volumes:
+      - ./user.service/src:/opt/node_app/src
+      - ./user.service/logs:/opt/node_app/logs
+      - /opt/node_app/node_modules
+    ports:
+      - ${USER_SERVICE_PORT}:${USER_SERVICE_PORT}
+    depends_on:
+      - gen_postgres
+      - gen_rabbitmq
+
+  gen_postgres:
+    image: postgres:14.3-alpine
+    restart: unless-stopped
+    hostname: 'postgres'
+    container_name: gen_postgres
+    command: postgres -c config_file=/etc/postgresql.conf
+    user: root
+    ports:
+      - ${DB_FORWARD_PORT:-5432}:5432
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./.docker/postgres/data:/var/lib/postgresql/data
+      - ./.docker/postgres/postgresql.conf:/etc/postgresql.conf
+      - ./.docker/postgres/initdb.d:/docker-entrypoint-initdb.d
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sh -c 'pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}'"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    shm_size: 256m
+    networks:
+      - gen
+
+  gen_rabbitmq:
+    image: rabbitmq:3.12.6-management-alpine
+    container_name: gen_rabbitmq
+    hostname: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    env_file:
+      - './.env'
+    volumes:
+      - ./.docker/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./.docker/rabbitmq/log/:/var/log/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD}
+    networks:
+      - gen
+
+networks:
+  gen:
+    driver: bridge
