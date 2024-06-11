@@ -1,6 +1,4 @@
 # Docker folders
-/.docker/postgres/data/
-/.docker/postgres/data/*
 /.docker/rabbitmq/*
 
 # Compiled output
@@ -37,6 +35,3 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
-# Env
-.env
