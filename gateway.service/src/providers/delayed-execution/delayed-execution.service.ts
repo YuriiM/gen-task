@@ -10,10 +10,9 @@ export class DelayedExecutionService {
     @Inject(DELAYED_EXECUTION_OPTIONS) private readonly options: T_DelayedExecutionOptions,
   ) {}
 
-  async runLater(callback: (context: any) => void, context: any): Promise<any> {
-    const { exchange, routingKey } = this.options
-    const payload = { callback: callback.toString(), context }
+  async runLater(serviceName: string, methodName: string, context: any): Promise<void> {
+    const message = { serviceName, methodName, context }
 
-    return this.amqpConnection.request({ exchange, routingKey, payload })
+    await this.amqpConnection.publish(this.options.exchange, this.options.routingKey, message)
   }
 }

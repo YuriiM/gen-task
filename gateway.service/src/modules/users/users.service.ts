@@ -1,14 +1,17 @@
-import { Injectable } from '@nestjs/common'
-import { UserDto } from './dto/user.dto'
-import { UpdateUserDto } from './dto/update-user.dto'
+import { Injectable, Logger } from '@nestjs/common'
+import { StatusDto } from '../../common/serializers/status.dto'
 import { DelayedExecutionService } from '../../providers/delayed-execution/delayed-execution.service'
+import { UpdateProfileDto } from './dto/update-profile.dto'
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly delayedTasksService: DelayedExecutionService) {}
+  private readonly logger = new Logger(UsersService.name)
 
-  // TODO: call runLater()
-  async updateUser(id: number, data: UpdateUserDto): Promise<UserDto> {
-    return { id, name: data.name }
+  constructor(private readonly delayedExecutionService: DelayedExecutionService) {}
+
+  async updateProfile(data: UpdateProfileDto): Promise<StatusDto> {
+    await this.delayedExecutionService.runLater('ProfilesService', 'updateProfile', data)
+
+    return StatusDto.ok()
   }
 }

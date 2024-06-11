@@ -9,11 +9,9 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe())
 
-  const config = new DocumentBuilder()
-    .setTitle('GEN TASK')
-    .setVersion('1.0')
-    .build()
+  const config = new DocumentBuilder().setTitle('GEN TASK').setVersion('1.0').build()
   const document = SwaggerModule.createDocument(app, config)
+
   SwaggerModule.setup('/', app, document)
 
   const appConfig = app.get(AppConfigService)

@@ -7,8 +7,8 @@ import { UsersService } from './users.service'
 @Module({
   imports: [
     DelayedExecutionModule.register({
-      exchange: ExchangeEnum.USER,
-      routingKey: RoutingKeyEnum.USER,
+      exchange: ExchangeEnum.USERS,
+      routingKey: RoutingKeyEnum.USERS_UPDATE,
     }),
   ],
   controllers: [UsersController],
