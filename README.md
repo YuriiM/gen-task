@@ -12,7 +12,9 @@ Make sure you have Docker and Docker Compose installed on your machine.
 
 2. Navigate to the project directory.
 
-3. Run "`docker compose up --build`" to build and start the application:
+3. Run `docker compose up --build` to build and start the application.
+
+If some ports are already in use, you may change them in the `.env` file.
 
 4. Once the containers are up and running, you can access the Swagger UI for API documentation by opening the following link in your web browser:
 
